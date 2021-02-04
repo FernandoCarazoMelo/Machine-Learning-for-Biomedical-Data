@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Visualisation with ggplot2</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Florian Privé" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Visualisation with ggplot2
+## <a href="https://privefl.github.io/R-presentation/ggplot2.html" class="uri">https://privefl.github.io/R-presentation/ggplot2.html</a>
+### Florian Privé
+### October 19, 2017<br>(minor updates in November 2020)
+
+---
+
+
+
+
+class: center, top, inverse
+background-image: url(http://hexb.in/vector/ggplot2.svg)
+background-position: 50% 80%
+background-size: 40%
+
+# http://ggplot2.tidyverse.org/
+
+---
+
+class: center, middle, inverse
+
+&gt; "The simple graph has brought more information to the data analyst’s mind than any other device." --- John Tukey
+
+---
+
+class: center, middle, inverse
+
+# Introduction
+
+---
+
+## What does *ggplot2* stand for?
+
+--
+
+### A __Grammar of Graphics__!
+
+--
+
+```
+ggplot(data = &lt;DATA&gt;) + 
+  &lt;GEOM_FUNCTION&gt;(
+     mapping = aes(&lt;MAPPINGS&gt;),
+     stat = &lt;STAT&gt;, 
+     position = &lt;POSITION&gt;
+  ) +
+  &lt;COORDINATE_FUNCTION&gt; +
+  &lt;FACET_FUNCTION&gt;
+```
+
+--
+
+&lt;/br&gt;
+
+#### You can uniquely describe any plot as a combination of these 7 parameters.
+
+---
+
+## How long have you known **ggplot2**?
+
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+
+--
+
+&lt;blockquote class="twitter-tweet" data-lang="en" align="center"&gt;&lt;p lang="en" dir="ltr"&gt;Happy 10th birthday ggplot2! 🎉🎂📊📈10 years ago today the first version was accepted to CRAN: &lt;a href="https://t.co/tiXIkqnCcA"&gt;https://t.co/tiXIkqnCcA&lt;/a&gt;&lt;/p&gt;&amp;mdash; Hadley Wickham (@hadleywickham) &lt;a href="https://twitter.com/hadleywickham/status/873556949207535616"&gt;10 juin 2017&lt;/a&gt;&lt;/blockquote&gt;
+
+---
+
+## Why use ggplot2?
+
+&lt;/br&gt;
+
+- Automatic legends, colors, etc.
+
+- Easy superposition, facetting, etc.
+
+- Nice rendering (though I don't like the default grey theme).
+
+- Store any ggplot2 object for modification or future recall. Super useful for packages.
+
+- Lots of users (less bugs, more help on Stack Overflow).
+
+- Lots of extensions.
+
+- Nice saving option.
+
+---
+
+class: center, middle, inverse
+
+# Tidy data?
+
+---
+
+## Untidy data
+
+
+
+
+```r
+fertilityData
+```
+
+```
+## # A tibble: 12 x 7
+##    Country             `1800` `1801` `1802` `1803` `1804` `1805`
+##    &lt;fct&gt;                &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+##  1 Afghanistan           7      7      7      7      7      7   
+##  2 Albania               4.6    4.6    4.6    4.6    4.6    4.6 
+##  3 Algeria               6.99   6.99   6.99   6.99   6.99   6.99
+##  4 Angola                6.93   6.93   6.93   6.93   6.93   6.93
+##  5 Antigua and Barbuda   5      5      4.99   4.99   4.99   4.98
+##  6 Argentina             6.8    6.8    6.8    6.8    6.8    6.8 
+##  7 Armenia               7.8    7.8    7.81   7.81   7.81   7.82
+##  8 Aruba                 5.64   5.64   5.64   5.64   5.64   5.64
+##  9 Australia             6.5    6.48   6.46   6.44   6.42   6.4 
+## 10 Austria               5.1    5.1    5.1    5.1    5.1    5.1 
+## 11 Azerbaijan            8.1    8.1    8.1    8.1    8.1    8.1 
+## 12 Bahamas               5.9    5.9    5.9    5.9    5.9    5.9
+```
+
+
+The variables are the **country**, **year** and **fertility rate**.
+
+---
+
+## Tidy data
+
+&lt;img src="http://r4ds.had.co.nz/images/tidy-1.png" style="display: block; margin: auto;" /&gt;
+
+It is easier to work and reason with
+
+- operations
+
+- manipulation
+
+- visualization
+
+&lt;br&gt;
+
+Learn more at http://tidyr.tidyverse.org/articles/tidy-data.html.
+
+---
+
+### Tidy the previous data
+
+
+```r
+library(dplyr)
+```
+
+
+```r
+(fertilityTidy &lt;- fertilityData %&gt;%
+   tidyr::pivot_longer(cols = -Country, names_to = "Year",
+                       values_to = "Fertility") %&gt;%
+   mutate(Year = as.integer(Year)))
+```
+
+```
+## # A tibble: 72 x 3
+##    Country      Year Fertility
+##    &lt;fct&gt;       &lt;int&gt;     &lt;dbl&gt;
+##  1 Afghanistan  1800       7  
+##  2 Afghanistan  1801       7  
+##  3 Afghanistan  1802       7  
+##  4 Afghanistan  1803       7  
+##  5 Afghanistan  1804       7  
+##  6 Afghanistan  1805       7  
+##  7 Albania      1800       4.6
+##  8 Albania      1801       4.6
+##  9 Albania      1802       4.6
+## 10 Albania      1803       4.6
+## # ... with 62 more rows
+```
+
+---
+
+### This is easier to plot
+
+
+```r
+ggplot(data = fertilityTidy) + 
+  geom_point(mapping = aes(x = Year, y = Fertility))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-6-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: center, middle, inverse
+
+# Basics &amp; Customization
+
+---
+
+### Use black and white theme everywhere
+
+
+```r
+library(ggplot2)
+theme_set(theme_bw(18))
+```
+
+***
+
+
+```r
+ggplot(data = fertilityTidy) + 
+  geom_point(mapping = aes(x = Year, y = Fertility))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-8-1.svg" width="65%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Drop extra typing
+
+
+```r
+ggplot(fertilityTidy) + 
+  geom_point(aes(Year, Fertility))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-9-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Add colors
+
+
+```r
+ggplot(fertilityTidy) + 
+  geom_point(aes(Year, Fertility, color = Country))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-10-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Add lines: add one geom
+
+
+```r
+ggplot(fertilityTidy) + 
+  geom_point(aes(Year, Fertility, color = Country)) + 
+  geom_line(aes(Year, Fertility, color = Country))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-11-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Remove redundancy: move 'aes' to the top
+
+#### So that the mapping is inherited by both geoms
+
+
+```r
+ggplot(fertilityTidy, aes(Year, Fertility, color = Country)) + 
+  geom_point() +
+  geom_line()
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-12-1.svg" width="72%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Larger points and lines
+
+
+```r
+ggplot(fertilityTidy, aes(Year, Fertility, color = Country)) + 
+  geom_point(size = 4) +
+  geom_line(size = 3)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-13-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Futher customization: themes
+
+
+```r
+ggplot(fertilityTidy, aes(Year, Fertility, color = Country)) + 
+  geom_point(size = 4) +
+  geom_line(size = 3) +
+  theme(aspect.ratio = 0.8, legend.key.width = unit(3, "line"))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-14-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: center, middle, inverse
+
+# Layers 
+
+---
+
+## Iris: base dataset of R
+
+### about plants
+
+
+```r
+as_tibble(iris)   ## print is better
+```
+
+```
+## # A tibble: 150 x 5
+##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # ... with 140 more rows
+```
+
+---
+
+## Layers: example with geom_smooth()
+
+
+```r
+ggplot(iris) + 
+  geom_point(aes(Petal.Length, Petal.Width, 
+                 color = Species, shape = Species), size = 3)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-16-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Geom_smooth on all: move x and y on top
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width)) + 
+  geom_point(aes(color = Species, shape = Species), size = 3) + 
+  geom_smooth(color = "black")
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-17-1.svg" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Points on top: change the order of layers
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width)) + 
+  geom_smooth(color = "black") + 
+  geom_point(aes(color = Species, shape = Species), size = 3)
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-18-1.svg" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Geom_smooth by group
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width)) + 
+  geom_smooth(aes(group = Species), color = "black") + 
+  geom_point(aes(color = Species, shape = Species), size = 3)
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-19-1.svg" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Or use color for both geoms
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) + 
+  geom_smooth() + 
+  geom_point(aes(shape = Species), size = 3)
+```
+
+```
+## `geom_smooth()` using method = 'loess' and formula 'y ~ x'
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-20-1.svg" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## An important application
+
+### Simpson's Paradox
+
+&lt;br&gt;
+
+&lt;img src="https://paulvanderlaken.files.wordpress.com/2017/09/simpsonsparadox.png?w=1080" style="display: block; margin: auto;" /&gt;
+
+.footnote[Source: https://goo.gl/GycYod]
+
+---
+
+## Learn more
+
+- [Chapter *Data Visualisation*](http://r4ds.had.co.nz/data-visualisation.html) of 
+
+&lt;img src="http://r4ds.had.co.nz/cover.png" width="35%" style="display: block; margin: auto;" /&gt;
+
+.footnote[Freely available online.]
+
+---
+
+## Find answers
+
+### [Stack Overflow questions with tag `[ggplot2]`](https://stackoverflow.com/questions/tagged/ggplot2)
+
+&lt;blockquote class="twitter-tweet" data-lang="en" align="center"&gt;&lt;p lang="en" dir="ltr"&gt;ok, hands up... when looking up code errors/questions with the intent of finding answers on Stack Overflow, do you:&lt;/p&gt;&amp;mdash; Sharla Gelfand (@sharlagelfand) &lt;a href="https://twitter.com/sharlagelfand/status/915654253456318464?ref_src=twsrc%5Etfw"&gt;4 octobre 2017&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src="//platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+
+&lt;br&gt;&lt;center&gt;e.g. google "larger points legend ggplot2"
+
+---
+
+## Using the Stack Overflow answer
+
+
+```r
+ggplot(iris) + 
+  geom_point(aes(Petal.Length, Petal.Width, 
+                 color = Species, shape = Species), size = 3) +
+  guides(colour = guide_legend(override.aes = list(size = 10)))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-23-1.svg" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Go check the [**R Graph Gallery**](https://www.r-graph-gallery.com/ggplot2-package.html)
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+&lt;br&gt;
+
+&lt;blockquote class="twitter-tweet" data-cards="hidden" data-lang="en" align="center"&gt;&lt;p lang="en" dir="ltr"&gt;🍾🍾 Today the &lt;a href="https://twitter.com/hashtag/rstats?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#rstats&lt;/a&gt; graph gallery reached 1.000.000 visits! 🍾🍾 Thanks to all users &amp;amp; contributors!&lt;a href="https://t.co/94JzuHDJot"&gt;https://t.co/94JzuHDJot&lt;/a&gt; &lt;a href="https://t.co/xu4XIsqmut"&gt;pic.twitter.com/xu4XIsqmut&lt;/a&gt;&lt;/p&gt;&amp;mdash; The R Graph Gallery (@R_Graph_Gallery) &lt;a href="https://twitter.com/R_Graph_Gallery/status/915092693977460741?ref_src=twsrc%5Etfw"&gt;3 octobre 2017&lt;/a&gt;&lt;/blockquote&gt;
+&lt;script async src="//platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+
+---
+
+class: center, middle, inverse
+
+# More
+
+---
+
+### Coordinates
+
+
+```r
+ggplot(iris) + 
+  geom_point(aes(Petal.Length, Petal.Width, 
+                 color = Species, shape = Species), size = 3) + 
+  scale_x_log10(breaks = 1:7)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-24-1.svg" width="77%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+### Facets
+
+
+```r
+ggplot(iris) + 
+  geom_point(aes(Petal.Length, Petal.Width, 
+                 color = Species, shape = Species), size = 3) + 
+  facet_grid(~ Species)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-25-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Iterate over variables with **aes_string**
+
+
+```r
+(var &lt;- names(iris)[1:4])
+```
+
+```
+## [1] "Sepal.Length" "Sepal.Width"  "Petal.Length" "Petal.Width"
+```
+
+```r
+p_list &lt;- list()
+for (i in seq_along(var)) {
+  p_list[[i]] &lt;- ggplot(iris, coeff = 0.6) + 
+    geom_density(aes_string(var[i], fill = "Species"), alpha = 0.6)
+    
+}
+
+str(p_list, max.level = 1)
+```
+
+```
+## List of 4
+##  $ :List of 9
+##   ..- attr(*, "class")= chr [1:2] "gg" "ggplot"
+##  $ :List of 9
+##   ..- attr(*, "class")= chr [1:2] "gg" "ggplot"
+##  $ :List of 9
+##   ..- attr(*, "class")= chr [1:2] "gg" "ggplot"
+##  $ :List of 9
+##   ..- attr(*, "class")= chr [1:2] "gg" "ggplot"
+```
+
+---
+
+## Combine plots with [cowplot](https://cran.r-project.org/web/packages/cowplot/vignettes/introduction.html)
+
+
+```r
+cowplot::plot_grid(plotlist = p_list, ncol = 2, align = "hv",
+                   labels = LETTERS[1:4], label_size = 15)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-27-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### Common legend
+
+
+```r
+lapply(p_list, function(p) p + theme(legend.position = "none")) %&gt;%
+  cowplot::plot_grid(plotlist = ., ncol = 2, align = "hv",
+                   labels = LETTERS[1:4], label_size = 15) %&gt;%
+  cowplot::plot_grid(cowplot::get_legend(p_list[[1]]),
+                     rel_widths = c(1, 0.3))
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-28-1.svg" width="85%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Interactive plots
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width, 
+                   color = Species, shape = Species)) + 
+  geom_point(size = 3)
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-29-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Transform ggplot to plotly
+
+
+```r
+plotly::ggplotly(width = 700, height = 450)
+```
+
+### Add more infos
+
+
+```r
+plotly::ggplotly(
+  last_plot() + aes(text = bigstatsr::asPlotlyText(iris)),
+  tooltip = "text", width = 700, height = 420)
+```
+
+&lt;br&gt;
+
+You might want to look at package [{widgetframe}](https://cran.r-project.org/web/packages/widgetframe/vignettes/Using_widgetframe.html).
+
+---
+
+## Miscellaneous
+
+- [Pie charts](https://guangchuangyu.github.io/2016/12/scatterpie-for-plotting-pies-on-ggplot/) but [others plots are often better](http://annkemery.com/pie-chart-guidelines/)
+
+- [Spatial Visualization](https://cran.r-project.org/web/packages/ggmap/index.html)
+
+- [Heatmaps](http://blog.aicry.com/r-heat-maps-with-ggplot2/)
+
+- [Cookbook for R - Graphs](http://www.cookbook-r.com/Graphs/)
+
+- [**Cheatsheet**](https://www.rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf)
+
+- [Top 50 ggplot2 Visualizations](http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html)
+
+- [**Viridis color palette**](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html)
+
+- [**An RStudio addin for ggplot2 theme tweaking**](https://github.com/calligross/ggthemeassist)
+
+- [**Publication Ready Plots**](http://www.sthda.com/english/rpkgs/ggpubr/)
+
+- [Extensions](https://exts.ggplot2.tidyverse.org/)
+
+---
+
+class: center, middle, inverse
+
+# Two last points from my experience
+
+---
+
+## Why I finally switched to using ggplot2?
+
+
+```r
+library(bigstatsr)
+X &lt;- big_attachExtdata()
+svd &lt;- big_SVD(X, big_scale(), k = 10)
+plot(svd, type = "scores")
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-32-1.svg" width="70%" style="display: block; margin: auto;" /&gt;
+
+---
+
+### An object that the user can modify
+
+
+```r
+pop &lt;- rep(c("POP1", "POP2", "POP3"), c(143, 167, 207))
+last_plot() + 
+  # add colors
+  aes(color = pop) + labs(color = "Population") +
+  ## change the place of the legend
+  theme(legend.position = c(0.85, 0.2)) + 
+  ## change the title and the label of the x-axis
+  labs(title = "Yet another title", x = "with a new 'x' label")
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-33-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## How I choose the size of a plot?
+
+- I plot something, e.g.
+
+
+```r
+ggplot(iris, aes(Petal.Length, Petal.Width, 
+                 color = Species, shape = Species)) + 
+  geom_point(size = 3)
+```
+
+- I use the *Zoom* button of RStudio
+
+- I resize the "Plot Zoom" windows till I'm satisfied
+
+- Right-click on this window -&gt; "Open Image"
+
+- Then, I use the dimensions that are displayed at the top in `ggsave()` with `scale = 1/100` (calibrate the value for your computer), e.g. 
+
+```r
+ggsave("myggplot.pdf", scale = 1/100, width = 888, height = 725)
+```
+
+.footnote[In R Markdown, use chunk options `out.width` and `fig.asp`.]
+
+---
+
+class: center, middle, inverse
+
+# Your turn
+
+---
+
+## Use this data..
+
+
+```r
+(df &lt;- gapminder::gapminder %&gt;%
+   filter(year == 1992))
+```
+
+```
+## # A tibble: 142 x 6
+##    country     continent  year lifeExp       pop gdpPercap
+##    &lt;fct&gt;       &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;     &lt;int&gt;     &lt;dbl&gt;
+##  1 Afghanistan Asia       1992    41.7  16317921      649.
+##  2 Albania     Europe     1992    71.6   3326498     2497.
+##  3 Algeria     Africa     1992    67.7  26298373     5023.
+##  4 Angola      Africa     1992    40.6   8735988     2628.
+##  5 Argentina   Americas   1992    71.9  33958947     9308.
+##  6 Australia   Oceania    1992    77.6  17481977    23425.
+##  7 Austria     Europe     1992    76.0   7914969    27042.
+##  8 Bahrain     Asia       1992    72.6    529491    19036.
+##  9 Bangladesh  Asia       1992    56.0 113704579      838.
+## 10 Belgium     Europe     1992    76.5  10045622    25576.
+## # ... with 132 more rows
+```
+
+---
+
+## ..to reproduce this plot
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-37-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+```r
+ggplot(df) + 
+  geom_point(aes(gdpPercap, lifeExp, size = pop, 
+                 color = continent)) +
+  scale_x_log10(breaks = c(300, 1e3, 3e3, 10e3, 30e3)) + 
+  labs(title = "Gapminder for 1992",
+       x = "Gross Domestic Product (log scale)",
+       y = "Life Expectancy at birth (years)",
+       color = "Continent", size = "Population")
+```
+
+&lt;img src="ggplot2_files/figure-html/unnamed-chunk-38-1.svg" width="78%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: center, middle, inverse
+
+# Thanks!
+
+&lt;br&gt;
+
+Presentation available at
+
+https://privefl.github.io/R-presentation/ggplot2.html
+
+&lt;br&gt;
+
+Twitter and GitHub: [@privefl](https://twitter.com/privefl)
+
+.footnote[Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

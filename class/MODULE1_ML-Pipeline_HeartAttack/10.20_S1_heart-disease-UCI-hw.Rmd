@@ -1,0 +1,387 @@
+---
+title: MODULE 1. Predicting Heart Attack. A Complete Machine Lerning Project Using R and Caret 
+date: 2021-02-04
+output: 
+  html_document:
+    theme: spacelab
+    highlight: haddock
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    df_print: paged
+    number_sections: true
+    
+author: Fernando Carazo^1^ 
+# bibliography: "references.bib" # Create file and uncomment. Cite as ej [@Ignatiadis_2016]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# library("knitcitations")
+#cleanbib()
+options("citation_format" = "pandoc")
+# write.bibtex(file="references.bib")
+```
+
+Contact info: **Fernando Carazo** <fcarazo@tecnun.es>
+
+[*^1^Department of Biomedical Engineering and Sciences, Tecnun. University of Navarre*](https://www.unav.edu/en/web/departamento-de-ingenieria-biomedica-y-ciencias/investigacion/computational-biology/presentacion)
+
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/carlosdg/PrediccionEnfermedadCoronaria/master/docs/images/HeartImage__GordonJohnson__Pixabay.png" alt="Image of a heart and an electrocardiogram with two normal heart beat" />
+</p>
+
+
+
+
+http://www.dalcame.com/images/ecg.jpg
+
+# Introduction
+
+According to the National Heart, Lung and Blood Institute:
+
+> Heart disease is a catch-all phrase for a variety of conditions that affect the heart’s structure and function. Coronary heart disease is a type of heart disease that develops when the arteries of the heart cannot deliver enough oxygen-rich blood to the heart. __It is the leading cause of death in the United States__.
+
+(Emphasis by me. Source: https://www.nhlbi.nih.gov/health-topics/espanol/enfermedad-coronaria)
+
+Also, according to the World Health Organization, cardiovascular diseases are the __leading cause of death globally__ (source:  https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)). 
+
+In this notebook we try to learn enough information of this topic to understand the [Heart Disease UCI](https://www.kaggle.com/ronitf/heart-disease-uci) dataset and build simple models to predict whether a patient has a disease or not based on features like the heart rate during exercise or the cholesterol levels in the blood.
+
+
+
+# Context
+
+## Blood and heart
+
+Blood is very important to ensure the proper functioning of the body. Its functions cover the transport of oxygen and nutrients to the cells of the body as well as the removal of the cellular waste products.
+
+Blood is transported to the rest of the body because it is pumped by the heart. This organ receives oxygen-poor blood and sends it to the lungs to oxygenate it. And sends the oxygen-rich blood that comes from the lugns to the rest of the body.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/carlosdg/PrediccionEnfermedadCoronaria/master/docs/images/Latidos.gif" alt="Blood flow through the chambers of the heart" />
+</p>
+
+>By josiño - Own work, Public Domain, https://commons.wikimedia.org/w/index.php?curid=9396374. Flow of the blood through the chambers of the heart. Blue arrows represent oxygen-poor blood received from the rest of the body and sent to the lungs. Red arrows represent oxygen-rich blood coming from the lungs that is sent to the rest of the body.
+
+An inadequate supply of the blood can yield the cells to not get enough energy to function properly, causing the death of the cells in the worst case.
+
+
+## Coronary heart disease
+
+The heart also needs oxygen and nutrients to function properly, these come through arteries known as coronary arteries. When we talk about a coronary disease, we often mean a difficulty of the blood flow in these arteries due to the accumulation of substances on their walls.
+
+<p align="center" class="figure">
+  <img src="https://raw.githubusercontent.com/carlosdg/PrediccionEnfermedadCoronaria/master/docs/images/Heart_attack-NIH.gif" alt="Death of heart cells due to an ischemia in the coronary arteries">
+</p>
+
+>By NIH: National Heart, Lung and Blood Institute - http://www.nhlbi.nih.gov/health/health-topics/topics/heartattack/, Public Domain, https://commons.wikimedia.org/w/index.php?curid=25287085. Death of heart cells due to an ischemia in the coronary arteries.
+
+In the worst case, the impact of leaving the cells of the heart without nutrients and oxygen is a heart attack, in other words, the death of part of the heart cells. This, in turn, would have an impact on the rest of the body because the pumping of the heart would be affected.
+
+
+## Glossary of terms
+
+- **Atherosclerosis:** accumulation of substances on the walls of arteries which can hinder the blood flow. Moreover, the rupture of this plaque of substances can cause the formation of a blood clot (thrombus) that, in turn, can block even more the affected area or go to other parts of the body and block those parts (embolism). (Sources: [American Heart Association](https://www.heart.org/en/health-topics/cholesterol/about-cholesterol/atherosclerosis), [Mayo Clinic](https://www.mayoclinic.org/diseases-conditions/arteriosclerosis-atherosclerosis/symptoms-causes/syc-20350569))
+
+- **Ischemia:** blood flow reduction to a tissue. This implies a reduction of the supply of oxygen and nutrients, so cells won't get enough energy to function properly. (Sources: [American Heart Association](https://www.heart.org/en/health-topics/heart-attack/about-heart-attacks/silent-ischemia-and-ischemic-heart-disease), [Mayo Clinic](https://www.mayoclinic.org/diseases-conditions/myocardial-ischemia/symptoms-causes/syc-20375417), [Wikipedia](https://en.wikipedia.org/wiki/Ischemia))
+
+- **Angina:** chest pain due to a blood flow reduction in the coronary arteries. (Sources: [United Kingdom National Health Service](https://www.nhs.uk/conditions/angina/), [(Spanish) Video sobre angina de Alberto Sanagustín](https://www.youtube.com/watch?v=3UhItS50mRI))
+
+- **Stable angina:** angina caused by situations that requires oxygen (for example, exercise or stress) and it goes away on rest.
+
+- **Unstable angina:** angina that can happen even on rest.
+
+- **Typican & atypical angina:** typical angina usually means a chest disconfort. However, looks like some people can experience other symptoms like nausea or shortness of breath. In these cases people talk about atypical angina. (Sources: [Harrington Hospital](https://www.harringtonhospital.org/typical-and-atypical-angina-what-to-look-for/), [Wikipedia](https://en.wikipedia.org/wiki/Angina#Diagnosis)).
+
+- **Thrombus:** blood mass in solid state that hinders the blood flow in a blood vessel. (Source: [MedlinePlus](https://medlineplus.gov/ency/article/001124.htm))
+
+- **Embolus:** thrombus that detatches and goes to other parts of the body. (Source: [MedlinePlus](https://medlineplus.gov/ency/article/001124.htm))
+
+- **Acute myocardial infarction:** also known as _heart attack_, is the death of part of the heart tissue due to an ischemia. In other words, it is the death of part of the cells due to the lack of oxygen. (Sources: [Healthline](https://www.healthline.com/health/acute-myocardial-infarction#causes), [Wikipedia](https://en.wikipedia.org/wiki/Infarction))
+
+- **Electrocardiogram:** graph record of the electric signals that causes heart beats. Each part of the record of a normal heart beat has a name, the most interesting ones for this project are the T wave and the ST segment because they can give some information about the presence of issues like an ischemia or infarction. (Sources: [Mayo Clinic](https://www.mayoclinic.org/tests-procedures/ekg/about/pac-20384983), [Wikipedia](https://es.wikipedia.org/wiki/Electrocardiograma), [(Spanish) Video sobre electrocardiograma de Alberto Sanagustín](https://www.youtube.com/watch?v=A67NDj3_RrU), [(Spanish) Serie de videos sobre el electrocardiograma normal de Alberto Sangaustín](https://www.youtube.com/watch?v=SLe281LBBRU&list=PL3BE5DA0A5DF3BF75))
+
+- **Nuclear stress test:** a radioactive dye is injected into the patient to see the blood flow on rest and doing exercise. Moreover, during this test the activity of the heart is also measured with an electrocardiogram. (Sources: [Mayo Clinic](https://www.mayoclinic.org/tests-procedures/nuclear-stress-test/about/pac-20385231), [Healthline](https://www.healthline.com/health/thallium-stress-test))
+
+- **Asymptomatic disease:** a disease that a patient has but they experience very few or no symptoms. (Sources: [(Spanish) definicion.de](https://definicion.de/asintomatico/), [MayoClinic](https://www.mayoclinic.org/es-es/diseases-conditions/heart-attack/expert-answers/silent-heart-attack/faq-20057777), [Wikipedia](https://en.wikipedia.org/wiki/Asymptomatic))
+
+- **Left ventricular hypertrophy:** thickening of the walls of the main heart chamber that pumps the blood to the rest of the body. This can cause the muscle to loose elasticity which, in turns, causes the heart to not work properly. (Sources: [Mayo Clinic](https://www.mayoclinic.org/diseases-conditions/left-ventricular-hypertrophy/symptoms-causes/syc-20374314))
+
+
+# Dataset
+
+This dataset is hosted on Kaggle ([Heart Disease UCI](https://www.kaggle.com/ronitf/heart-disease-uci)), and it was from [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/datasets/Heart+Disease). There are records of about 300 patients from Cleveland and the features are described in a following section.
+
+According to the information provided by Kaggle, the available variables are:
+
+Context
+
+This database contains 76 attributes, but all published experiments refer to using a subset of 14 of them. In particular, the Cleveland database is the only one that has been used by ML researchers to this date. 
+
+*The "goal" field refers to the presence of heart disease in the patient.*
+
+Content
+
+Attribute Information:
+
+1. age
+2. sex
+3. chest pain type (4 values)
+4. resting blood pressure
+5. serum cholestoral in mg/dl
+6. fbs: fasting blood sugar > 120 mg/dl
+
+*Hereon, variables are related to a nuclear stress test. That is, a stress test where a radioactive dye is also injected to the patient to see the blood flow:*
+
+7. restecg: resting electrocardiographic results (values 0,1,2)
+8. thalach: maximum heart rate achieved
+9. exang: exercise induced angina
+10.oldpeak: ST depression induced by exercise relative to rest
+11. slope: the slope of the peak exercise ST segment
+12. ca: number of major vessels (0-3) colored by flourosopy
+13. thal: 3 = normal; 6 = fixed defect; 7 = reversable defect
+
+The names and social security numbers of the patients were recently removed from the database, replaced with dummy values. One file has been "processed", that one containing the Cleveland database. All four unprocessed files also exist in this directory.
+
+
+```{r}
+# Libraries
+library(ggplot2)
+library(caret)
+library(rpart.plot)
+library(tidyverse)
+library(skimr)
+
+# Read the data
+data <- read.csv('./data/heart_mod_2021-02-04.csv')
+
+dim(data)
+colnames(data)
+
+
+```
+
+
+# Exploratory data analysis
+
+Before training a predictive model, or even before performing any calculation with a new data set, it is important to carry out a descriptive exploration of them. This process allows a better understanding of what information each variable contains, as well as detecting possible errors. Some common examples are:
+
+- That a column has been stored with the wrong type: a numeric variable is being recognized as text or vice versa.
+
+- That a variable contains values that do not make sense: for example, to indicate that the price of a home is not available, enter the value 0 or a blank space.
+
+- That a word has been entered in a numeric type variable instead of a number.
+
+Furthermore, this initial analysis can give clues as to which variables are suitable as predictors in a model (more on this in the following sections).
+
+The skimr, DataExplorer and GGally packages make this task a lot easier thanks to their pre-configured functions.
+
+## Variable type
+
+Before training a predictive model, or even before performing any calculation with a new data set, it is very important to carry out a descriptive exploration of them. This process allows us to better understand what information each variable contains, as well as detect possible errors. Some common examples are:
+
+- That a column has been stored with the wrong type: a numeric variable is being recognized as text.
+
+- That a variable contains values that do not make sense: e.g, that the height of a person is not available, enter the value zero or a blank space. There is no one whose height is zero.
+
+- That a word has been entered in a numeric type variable instead of a number.
+
+- Furthermore, it can give clues as to which variables are not suitable as predictors in a model (more on this in the following sections).
+
+
+```{r}
+glimpse(data)
+summary(data)
+skim(data)
+
+```
+
+
+
+## Dataset features
+
+
+```{r}
+
+# remove X column
+
+
+# Transform categorical variable to R factors
+
+
+# Give a better name to the factor values for the graphs
+
+```
+
+> YOR TURN: INPECT ALL VARIABLES AND MAKE YOUR HYPOTHESES OF HOW EACH VARIABLE AFFECTS HEART ATTACK INCIDENCE ("target" column) 
+
+### target
+
+Target variable: whether the patient has a heart disease or not
+
+- Value 0: yes
+- Value 1: no
+
+We can see that the distribution is quite balanced. Thanks to this it wouldn't be a bad idea using accuracy to evaluate how well the models perform.
+
+```{r}
+ggplot(data, aes(target, fill=target)) + 
+  geom_bar() +
+  labs(x="Disease", y="Number of patients") +
+  guides(fill=FALSE)
+```
+
+### age
+
+Patient age in years. 
+
+### sex
+
+Patient sex
+
+- Value 0: female
+- Value 1: male
+
+
+
+### cp
+
+Chest pain type
+
+- Value 0: asymptomatic
+- Value 1: atypical angina
+- Value 2: pain without relation to angina
+- Value 3: typical angina
+
+
+
+### trestbps
+
+Resting blood pressure in millimeters of mercury (mm Hg) when the patient was admitted to the hospital.
+
+
+
+### chol
+
+Cholesterol level in mg/dl. 
+
+
+### fbs
+
+Whether the level of sugar in the blood is higher than 120 mg/dl or not. 
+
+- Value 0: no
+- Value 1: yes
+
+
+*Hereon, variables are related to a nuclear stress test. That is, a stress test where a radioactive dye is also injected to the patient to see the blood flow.*
+
+> [ECG Expanation](https://www.youtube.com/watch?v=Xl4Hmm_dwew&ab)
+
+
+
+<p align="center">
+    <img src="http://www.dalcame.com/images/ecg.jpg" alt="Image of an electrocardiogram with two normal heart beat" />
+</p>
+
+### restecg
+
+Results of the electrocardiogram on rest
+
+- Value 0: probable left ventricular hypertrophy
+- Value 1: normal
+- Value 2: abnormalities in the T wave or ST segment
+
+
+
+
+### thalach
+
+Maxium heart rate during the stress test
+
+
+
+### exang
+
+Whether the patient had angina during exercise
+
+- Valor 0: no
+- Valor 1: yes
+
+
+### oldpeak
+
+Decrease of the ST segment during exercise according to the same one on rest.
+
+
+
+### slope
+
+Slope of the ST segment during the most demanding part of the exercise
+
+- Value 0: descending
+- Value 1: flat
+- Value 2: ascending
+
+<p align="center">
+    <img src="https://litfl.com/wp-content/uploads/2018/10/ST-segment-depression-upsloping-downsloping-horizontal.png" alt="Image of ST slope" />
+</p>
+
+
+
+
+
+### thal
+
+Results of the blood flow observed via the radioactive dye.
+
+- Value 0: NULL (dropped from the dataset previously)
+- Value 1: fixed defect (no blood flow in some part of the heart)
+- Value 2: normal blood flow
+- Value 3: reversible defect (a blood flow is observed but it is not normal)
+
+
+
+### ca
+
+
+This feature refers to the number of narrow blood vessels seen.
+
+
+# Models
+
+For this part I chose to build four models. Three simple ones: logistic regression, naïve bayes and decision trees. And one a bit more complex: random forest.
+
+Null values where already dropped in a previous cell. Also, categorical variables have already been converted to R factors. Apart from this no more explicit preprocessing was done in this notebook to keep it simple and easy to follow.
+
+To compare the models we first divide the dataset in a training set with 70% of instances and a test set with the rest of the instances. And this taking into account that the distribution of the target has to be the same in both sets.
+
+The test set mimics data in the real world, it will only be used at the end of the project to get a more robust measure of the models on unseen data.
+
+The training set will be used to evaluate the models via 10 fold cross-validation. For simplicity, we'll leave the hypeparameter selection of the models by default, this means that some random combinations will be chosen and the models will be trained via cross-validation for each combination, keeping the hiperparameter combination that gave the best result.
+
+
+# Bibliography
+
+In addition to the links provided throughout the notebook, the following resources where also consulted to better understand the topic:
+
+- "Heart disease and heart attacks". Khan Academy. Link: [https://www.khanacademy.org/science/health-and-medicine/healthcare-misc/v/heart-disease-and-heart-attacks](https://www.khanacademy.org/science/health-and-medicine/healthcare-misc/v/heart-disease-and-heart-attacks)
+
+- "Cellular respiration introduction". Khan Academy. Link: [https://www.khanacademy.org/science/biology/cellular-respiration-and-fermentation/intro-to-cellular-respiration/v/introduction-to-cellular-respiration](https://www.khanacademy.org/science/biology/cellular-respiration-and-fermentation/intro-to-cellular-respiration/v/introduction-to-cellular-respiration)
+
+- "Enfermedades cardiovasculares". Organización Mundial de la Salud. Link: [https://www.who.int/es/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)](https://www.who.int/es/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds))
+
+- "Heart Disease". Mayo Clinic. Link: [https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118](https://www.mayoclinic.org/diseases-conditions/heart-disease/symptoms-causes/syc-20353118)
+
+- "Coronary artery disease". Mayo Clinic. Link: [https://www.mayoclinic.org/diseases-conditions/coronary-artery-disease/symptoms-causes/syc-20350613](https://www.mayoclinic.org/diseases-conditions/coronary-artery-disease/symptoms-causes/syc-20350613)
+
+- "Heart Attack (Myocardial Infarction)". Cleveland Clinic. Link: [https://my.clevelandclinic.org/health/diseases/16818-heart-attack-myocardial-infarction](https://my.clevelandclinic.org/health/diseases/16818-heart-attack-myocardial-infarction)
+
+- "Coronary Artery Disease". Cleveland Clinic. Link: [https://my.clevelandclinic.org/health/diseases/16898-coronary-artery-disease](https://my.clevelandclinic.org/health/diseases/16898-coronary-artery-disease)
+
+- Institute of Medicine (US) Committee on Social Security Cardiovascular Disability Criteria. Cardiovascular Disability: Updating the Social Security Listings. Washington (DC): National Academies Press (US); 2010. 7, Ischemic Heart Disease. Available from: https://www.ncbi.nlm.nih.gov/books/NBK209964/
+
+Hope this was helpful, feel free to give an upvote if you like it. Also, if I made any mistake or if you have any question feel free to write it in the comments 🙂
+
