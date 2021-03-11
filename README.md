@@ -2,7 +2,7 @@
 
 Course of Machine Learning for Biomedical Data - TECNUN University of Navarra
 
-SESSION CONTENTS AND FILES
+**SESSION CONTENTS AND FILES**
 
 |    Day     | Column2 | Column5        | Session    | MODULE             | FILES                                                                                                                                                                                              |
 | :--------: | ------- | -------------- | ---------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
