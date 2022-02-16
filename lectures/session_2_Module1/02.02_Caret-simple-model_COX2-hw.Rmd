@@ -1,0 +1,71 @@
+---
+title: Caret simple modelling - COX2 example
+date: 2021-02-18
+output: 
+  html_document:
+    theme: spacelab
+    highlight: haddock
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    df_print: paged
+    number_sections: true
+    
+author: Fernando Carazo^1^ 
+# bibliography: "references.bib" # Create file and uncomment. Cite as ej [@Ignatiadis_2016]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# library("knitcitations")
+#cleanbib()
+options("citation_format" = "pandoc")
+# write.bibtex(file="references.bib")
+```
+
+Contact info: **Fernando Carazo** <fcarazo@tecnun.es>
+
+[*^1^Department of Biomedical Engineering and Sciences, Tecnun. University of Navarre*](https://www.unav.edu/en/web/departamento-de-ingenieria-biomedica-y-ciencias/investigacion/computational-biology/presentacion)
+
+
+
+# COX-2 Activity Data
+From Sutherland, O’Brien, and Weaver (2003): A set of 467 cyclooxygenase-2 (COX-2) inhibitors has been assembled from the published work of a single research group, with in vitro activities against human recombinant enzyme expressed as IC50 values ranging from 1 nM to >100 uM (53 compounds have indeterminate IC50 values).
+
+A set of 255 descriptors (MOE2D and QikProp) were generated. To classify the data, we used a cutoff of $2^{2.5}$ to determine activity.
+
+Using data(cox2) exposes three R objects: `cox2Descr` is a data frame with the descriptor data, `cox2IC50` is a numeric vector of IC50 assay values and `cox2Class` is a factor vector with the activity results.
+
+```{r}
+library(recipes)
+library(caret)
+library(vip)
+data(cox2)
+cox2 <- cox2Descr
+cox2$potency <- cox2IC50
+
+
+# Final transformation
+  ## Create the model recipe outcome: "potency", predictors: all variables.
+
+  ## Log10 the outcome
+
+  ## Remove near to zero predictors
+
+  ## find a step to run PCA
+
+  ## Surface area predictors are highly correlated so
+  ## conduct PCA just on these.
+
+
+  ## Remove other highly correlated predictors (up to 0.9 cor)
+ 
+
+  ## Center and scale all of the non-PCA predictors
+
+
+```
+
+
+
+https://recipes.tidymodels.org/reference/index.html
