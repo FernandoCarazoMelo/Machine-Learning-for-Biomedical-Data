@@ -1,0 +1,103 @@
+---
+title: Caret simple modelling - COX2 example
+date: 2021-02-18
+output: 
+  html_document:
+    theme: spacelab
+    highlight: haddock
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    df_print: paged
+    number_sections: true
+    
+author: Fernando Carazo^1^ 
+# bibliography: "references.bib" # Create file and uncomment. Cite as ej [@Ignatiadis_2016]
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# library("knitcitations")
+#cleanbib()
+options("citation_format" = "pandoc")
+# write.bibtex(file="references.bib")
+```
+
+Contact info: **Fernando Carazo** <fcarazo@tecnun.es>
+
+[*^1^Department of Biomedical Engineering and Sciences, Tecnun. University of Navarre*](https://www.unav.edu/en/web/departamento-de-ingenieria-biomedica-y-ciencias/investigacion/computational-biology/presentacion)
+
+
+
+# COX-2 Activity Data
+From Sutherland, O’Brien, and Weaver (2003): A set of 467 cyclooxygenase-2 (COX-2) inhibitors has been assembled from the published work of a single research group, with in vitro activities against human recombinant enzyme expressed as IC50 values ranging from 1 nM to >100 uM (53 compounds have indeterminate IC50 values).
+
+A set of 255 descriptors (MOE2D and QikProp) were generated. To classify the data, we used a cutoff of $2^{2.5}$ to determine activity.
+
+Using data(cox2) exposes three R objects: `cox2Descr` is a data frame with the descriptor data, `cox2IC50` is a numeric vector of IC50 assay values and `cox2Class` is a factor vector with the activity results.
+
+```{r}
+library(recipes)
+library(caret)
+library(vip)
+data(cox2)
+cox2 <- cox2Descr
+cox2$potency <- cox2IC50
+
+
+# aux <- cox2[250:256]
+# cox2_recipe <-  recipe(potency ~ ., data = aux) %>%
+#   ## Log the outcome
+#   step_log(potency, base = 10) %>%
+#   ## Remove sparse and unbalanced predictors
+#   step_nzv(all_predictors()) %>%
+#   ## Surface area predictors are highly correlated so
+#   ## conduct PCA just on these.
+#   step_pca(all_predictors(), threshold = .95, prefix = "surf_area")
+# 
+# 
+# %>%
+#   ## Remove other highly correlated predictors
+#   step_corr(all_predictors(), -contains("VSA"),
+#             threshold = .90) %>%
+#   ## Center and scale all of the non-PCA predictors
+#   step_center(all_predictors(), -contains("VSA")) %>%
+#   step_scale(all_predictors(), -contains("VSA"))
+# 
+# 
+# cox2_transform <- cox2_recipe %>% prep(aux) %>% juice(); cox2_recipe
+
+
+# Final transformation
+  ## Create the model recipe outcome: "potency", predictors: all variables.
+cox2_recipe <- recipe(potency ~ ., data = cox2) %>%
+  ## Log10 the outcome
+  step_log(potency, base = 10) %>%
+  ## Remove near to zero predictors
+  step_nzv(all_predictors()) %>%
+  ## find a step to run PCA
+  ## Surface area predictors are highly correlated so
+  ## conduct PCA just on these.
+  step_pca(contains("VSA"), prefix = "surf_area_",
+           threshold = .95) %>%
+  ## Remove other highly correlated predictors (up to 0.9 cor)
+  step_corr(all_predictors(), -starts_with("surf_area_"),
+            threshold = .90) %>%
+  ## Center and scale all of the non-PCA predictors
+  step_center(all_predictors(), -starts_with("surf_area_")) %>%
+  step_scale(all_predictors(), -starts_with("surf_area_"))
+
+set.seed(888)
+cox2_lm <- train(cox2_recipe,
+                 data = cox2,
+                 method = "lm",
+                 trControl = trainControl(method = "cv", number = 5))
+
+summary(cox2_lm)
+vip(cox2_lm)
+
+```
+
+
+
+https://recipes.tidymodels.org/reference/index.html
