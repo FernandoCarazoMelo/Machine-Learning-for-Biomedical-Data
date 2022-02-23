@@ -19,7 +19,7 @@ This repository contains two main folders: *docs* and *lectures*.
 | Session 1  | MODULE 1: Heart Attack prediction | - 01.01 <br> - 01.02 train, test, valid. Overfitting. crossvalidation.|
 | Session 2  | MODULE 1: Heart Attack prediction | - 02.01 normalization, box-cox, missing values: create your problem, recipes <br> - [Recipes package](https://recipes.tidymodels.org/reference/index.html) <br> - [Ordering of Steps](https://recipes.tidymodels.org/articles/Ordering.html)|
 | Session 3  | MODULE 1: Heart Attack prediction (ML with python)| - 10.40_S3_Caret-simple-model_COX2-solved.Rmd<br>- [tidymodels](https://recipes.tidymodels.org/reference/index.html)<br>- 10.50_S3_heart-disease-UCI-hw<br>- [caret/available-models](http://topepo.github.io/caret/available-models.html)                  |
-| Session 4  | MODULE 2: Breast Cancer (ML with python) | - Model comparison <br>- MODULE 2: Breast Cancer (ML with python) - decision trees|
+| Session 4  | MODULE 2: Breast Cancer (ML with python) | - 04.01_Model comparison, hyperparameter optimization, roc curves, accuracy <br>- Onenote, 04.10_CART.pptx, 04.30_build tree decision trees <br> - Present challenge in ADI|
 | Session 5  | MODULE 2: Breast Cancer (ML with python) | - Bagging and Random Forest <br>- [GIT](http://git-scm.com/) <br>- [bagging tutorial](https://bradleyboehmke.github.io/HOML/bagging.html)|
 | Session 6  | MODULE 2: Breast Cancer (ML with python) | - SVMs and Random Forest II <br>- 02.70_Recupercaion_Clase_25mar|
 | Session 7  | MODULE 2: Breast Cancer (ML with python) | - Assignment 2 <br>- Tutorial|
