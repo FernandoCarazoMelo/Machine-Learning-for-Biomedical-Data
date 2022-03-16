@@ -13,4 +13,5 @@ class-solved/
 private-lectures/
 private-docs/
 2020-2021/
-.Rhistory
+*.Rhistory
+.ipynb_checkpoints/
