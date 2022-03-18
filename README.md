@@ -6,9 +6,9 @@ Course of Machine Learning for Biomedical Data - TECNUN University of Navarra.
 
 This repository contains two main folders: *docs* and *lectures*.
 
-- In the folder *docs* you can find general documantation about R, Python, Machine Learning, Deep Learning and Artificial Intellegence
+- In the *docs* folder you will find documents about R, Python, Machine Learning, Deep Learning and Artificial Intellegence
 
-- The folder *lectures* will be updated before each session with the neccesary material to follow the session. After having the session,  the *"lectures"* folder will be updated with the solution of the challenges proposed in the session.
+- In the *lectures* folder you will find the neccesary material to follow the session. After having the session,  the *"lectures"* folder will be updated with the solution of the challenges proposed in the session.
 
 **SESSION CONTENTS AND FILES**
 
