@@ -26,4 +26,4 @@ This repository contains two main folders: *docs* and *lectures*.
 | Session 8  | Fernando Carazo | MODULE 3: Deep Learning | - 03.02_TransferLearning_Tensorflow.ipynb <br>- [Tutorial: Transfer learning with CNNs](https://machinelearningmastery.com/how-to-use-transfer-learning-when-developing-convolutional-neural-network-models/) <br> - [Keras API](https://keras.io/api/applications/)|
 | Session 9  | Idoia Ochoa | MODULE 3: Deep Learning | - NN Regularization |
 | Session 10 | Idoia Ochoa | MODULE 3: Deep Learning | - CNNs 1 |
-| Session 11 | Idoia Ochoa | MODULE 3: Chest X-rays (Deep Learning) | - CNNs 2 |
+| Session 11 | Idoia Ochoa | MODULE 3: Deep Learning | - CNNs 2 |
