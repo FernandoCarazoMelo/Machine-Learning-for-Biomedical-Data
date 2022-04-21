@@ -23,7 +23,7 @@ This repository contains two main folders: *docs* and *lectures*.
 | Session 5  | Fernando Carazo | MODULE 2: Breast Cancer (ML with python) | - Bagging and Random Forest <br>- [GIT](http://git-scm.com/) <br>- [bagging tutorial](https://bradleyboehmke.github.io/HOML/bagging.html) <br> - [Bagging vs Boosting](https://towardsdatascience.com/ensemble-learning-bagging-boosting-3098079e5422)|
 | Session 6  | Fernando Carazo | MODULE 3: Deep Learning | - Deep Neural Networks with PyTorch. <br>- Tensors, gradients, weights and biases, Gradient descent, SGD <br>- Homeworks: DL with hidden layers from scratch, Read DataLoaders [doc 06.02](lectures/session_6_Module3/06.02_linear-regression_FC_solution.ipynb)|
 | Session 7  | Fernando Carazo | MODULE 3: Deep Learning | - DNN application 1 with Tensorflow. Autoencoders <br>- Application to heart ECG detection|
-| Session 8  | Fernando Carazo | MODULE 3: Deep Learning | - 03.02_TransferLearning_Tensorflow.ipynb <br>- [Tutorial: Transfer learning with CNNs](https://machinelearningmastery.com/how-to-use-transfer-learning-when-developing-convolutional-neural-network-models/) <br> - [Keras API](https://keras.io/api/applications/)|
-| Session 9  | Idoia Ochoa | MODULE 3: Deep Learning | - NN Regularization |
+| Session 8  | Fernando Carazo | MODULE 3: Deep Learning | - Deep Learning with Keras and Tensorflow <br> - [Keras API](https://keras.io/api/applications/)|
+| Session 9  | Idoia Ochoa | MODULE 3: Deep Learning | - Advanced NNs: Regularization, Dropout, optimizers |
 | Session 10 | Idoia Ochoa | MODULE 3: Deep Learning | - CNNs 1 |
 | Session 11 | Idoia Ochoa | MODULE 3: Deep Learning | - CNNs 2 |
