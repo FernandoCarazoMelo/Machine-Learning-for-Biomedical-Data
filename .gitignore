@@ -15,3 +15,4 @@ private-docs/
 2020-2021/
 *.Rhistory
 .ipynb_checkpoints/
+mlbio2024/logs/*
