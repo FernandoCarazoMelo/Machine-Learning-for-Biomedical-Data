@@ -1,0 +1,24 @@
+{
+  "name": "Clase Python con uv y pyproject",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/uv:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "google.gemini-vscode"
+      ],
+      "settings": {
+        // Esto le dice a VS Code que use el entorno que crea uv
+        "python.defaultInterpreterPath": ".venv/bin/python"
+      }
+    }
+  },
+
+  // Sincroniza el proyecto y crea el entorno virtual automáticamente
+  "postCreateCommand": "uv sync"
+}
