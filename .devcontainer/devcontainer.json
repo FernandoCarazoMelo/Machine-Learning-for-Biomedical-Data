@@ -10,13 +10,18 @@
     "vscode": {
       "extensions": [
         "ms-python.python",
-        "google.gemini-vscode"
+        "ms-toolsai.datawrangler"
       ],
       "settings": {
         // Esto le dice a VS Code que use el entorno que crea uv
         "python.defaultInterpreterPath": ".venv/bin/python"
       }
     }
+  },
+
+  "remoteEnv": {
+    "VIRTUAL_ENV": "${containerWorkspaceFolder}/.venv",
+    "PATH": "${containerWorkspaceFolder}/.venv/bin:${containerEnv:PATH}"
   },
 
   // Sincroniza el proyecto y crea el entorno virtual automáticamente
